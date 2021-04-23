@@ -127,16 +127,23 @@ export class GhostService {
         async file => {
           await this.dbDriver.deleteFile(file.path)
           await invalidateFile(file.path)
-        }
+        },
+        { concurrency: 10 }
       )
 
       // Upload all local files for that scope
       if (localFiles.length) {
-        await Promise.map(localFiles, async filePath => {
-          const content = await this.diskDriver.readFile(path.join(tmpFolder, filePath))
-          await this.dbDriver.upsertFile(filePath, content, false)
-          await invalidateFile(filePath)
-        })
+        await Promise.map(
+          localFiles,
+          async filePath => {
+            const content = await this.diskDriver.readFile(path.join(tmpFolder, filePath))
+            await this.dbDriver.upsertFile(filePath, content, false)
+            await invalidateFile(filePath)
+          },
+          {
+            concurrency: 10
+          }
+        )
       }
     }
 
