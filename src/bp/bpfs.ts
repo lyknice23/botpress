@@ -113,7 +113,7 @@ class BPFS {
       if (useForce) {
         console.info(chalk.blue(`Force pushing local changes to ${this.serverUrl}...`))
 
-        await axiosClient.post('update', archive)
+        await axiosClient.post('update', archive, { timeout: 1200000 })
 
         if (!keepRevisions) {
           await this._clearRevisions(this.sourceDir)
